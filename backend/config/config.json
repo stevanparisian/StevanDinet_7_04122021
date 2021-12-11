@@ -4,20 +4,26 @@
     "password": "Nineinchnails1994",
     "database": "groupomania_development",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "operatorsAliases": false,
+    "timezone": "SYSTEM"
   },
   "test": {
     "username": "root",
     "password": "Nineinchnails1994",
     "database": "groupomania_test",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "operatorsAliases": false,
+    "timezone": "SYSTEM"
   },
   "production": {
     "username": "root",
     "password": "Nineinchnails1994",
     "database": "groupomania_production",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "operatorsAliases": false,
+    "timezone": "SYSTEM"
   }
 }
