@@ -11,7 +11,7 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
-    <router-link class="navbar-brand" to="/">
+    <router-link class="navbar-brand" to="/wall">
       <img class="w-50" src="../assets/icon-left-font-monochrome-black.svg" alt="Logo Groupomania" />
     </router-link>
 
