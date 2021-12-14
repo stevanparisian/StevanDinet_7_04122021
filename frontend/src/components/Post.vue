@@ -38,12 +38,12 @@
         </div>
       </div>
     </div>
+      <div class="card-text" v-if="post.content!=='null'">
+        <p class="mb-0 p-2">{{post.content}}</p>
+      </div>
     <div class="card-body">
       <div class="card-img-top w-75 mx-auto" v-if="post.attachement">
         <img :src="post.attachement" alt="..." class="w-100" />
-      </div>
-      <div class="card-text" v-if="post.content!=='null'">
-        <p class="mb-0">{{post.content}}</p>
       </div>
     </div>
   </div>
