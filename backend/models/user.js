@@ -1,14 +1,25 @@
-'use strict';
+
+
+  'use strict';
+const {Model, TINYINT} = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define('User', {
-    email: DataTypes.STRING,
-    username: DataTypes.STRING,
-    password: DataTypes.STRING,
-    isAdmin: DataTypes.BOOLEAN
-  }, {});
-  User.associate = function(models) {
-    // associations can be defined here
-    models.User.hasMany(models.Post)
+  class User extends Model {
+   
+    static associate(models) {
+    
+      models.User.hasMany(models.Post);
+    }
   };
+  User.init({
+    email: DataTypes.STRING,
+    firstName: DataTypes.STRING,
+    lastName: DataTypes.STRING,
+    password: DataTypes.STRING,
+    picture : DataTypes.STRING,
+    isAdmin : TINYINT,
+  }, {
+    sequelize,
+    modelName: 'User',
+  });
   return User;
 };

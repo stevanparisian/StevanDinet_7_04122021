@@ -27,6 +27,7 @@ CREATE TABLE `Posts` (
   `userId` int NOT NULL,
   `content` varchar(255) DEFAULT NULL,
   `attachement` varchar(255) DEFAULT NULL,
+  `comment` varchar(255) DEFAULT NULL,
   `createdAt` varchar(255) NOT NULL,
   `updatedAt` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),

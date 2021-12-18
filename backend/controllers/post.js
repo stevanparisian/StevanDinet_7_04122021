@@ -1,146 +1,131 @@
-//Import
-let models = require('../models');
-let utils = require('../utils/jwtUtils');
-const fs = require('fs');
+const db = require('../models/index');
+const fs = require('fs')
 
 
-//Création d'un message
-exports.create = (req, res) => {
-    //Declaration de l'url de l'image
-    let attachmentURL
-    //identifier qui créé le message
-    let id = utils.getUserId(req.headers.authorization)
-    models.User.findOne({
-        attributes: ['id', 'email', 'username'],
-        where: { id: id }
+
+const Post = db.post;
+exports.createPost = (req, res, next) => {
+
+  if (!req.body.title) {
+    return res.status(400).send({
+      message: "Veuillez ajouter un titre"
     })
-        .then(user => {
-            if (user !== null) {
-                //Récupération du corps du post
-                let content = req.body.content;
-                if (req.file != undefined) {
-                    attachmentURL = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
-                }
-                else {
-                    attachmentURL == null
-                };
-                if ((content == 'null' && attachmentURL == null)) {
-                    res.status(400).json({ error: 'Rien à publier' })
-                } else {
-                    models.Post.create({
-                        content: content,
-                        attachement: attachmentURL,
-                        UserId: user.id
-                    })
-                        .then((newPost) => {
-                            res.status(201).json(newPost)
-                        })
-                        .catch((err) => {
-                            res.status(500).json(err)
-                        })
-                };
-            } else {
-                res.status(400).json(error);
-            }
-        })
-        .catch(error => res.status(500).json(error));
-}
+  };
 
-//Afficher les posts sur le mur
-exports.listMsg = (req, res) => {
-    models.Post.findAll({
-        include: [{
-            model: models.User,
-            attributes: ['username']
-        }],
-        order: [['createdAt', 'DESC']]
-    })
-        .then(posts => {
-            if (posts.length > null) {
-                res.status(200).json(posts)
-            } else {
-                res.status(404).json({ error: 'Pas de post à afficher' })
-            }
-        })
-        .catch(err => res.status(500).json(err))
-}
 
-//Suppression d'un post
-exports.delete = (req, res) => {
-    //req => userId, postId, user.isAdmin
-    let userOrder = req.body.userIdOrder;
-    //identification du demandeur
-    let id = utils.getUserId(req.headers.authorization)
-    models.User.findOne({
-        attributes: ['id', 'email', 'username', 'isAdmin'],
-        where: { id: id }
-    })
-        .then(user => {
-            //Vérification que le demandeur est soit l'admin soit le poster (vérif aussi sur le front)
-            if (user && (user.isAdmin == true || user.id == userOrder)) {
-                console.log('Suppression du post id :', req.body.postId);
-                models.Post
-                    .findOne({
-                        where: { id: req.body.postId }
-                    })
-                    .then((postFind) => {
 
-                        if (postFind.attachement) {
-                            const filename = postFind.attachement.split('/images/')[1];
-                            console.log("teseeeest", filename);
-                            fs.unlink(`images/${filename}`, () => {
-                                models.Post
-                                    .destroy({
-                                        where: { id: postFind.id }
-                                    })
-                                    .then(() => res.end())
-                                    .catch(err => res.status(500).json(err))
-                            })
-                        }
-                        else {
-                            models.Post
-                                .destroy({
-                                    where: { id: postFind.id }
-                                })
-                                .then(() => res.end())
-                                .catch(err => res.status(500).json(err))
-                        }
-                    })
-                    .catch(err => res.status(500).json(err))
-            } else { res.status(403).json('Utilisateur non autorisé à supprimer ce post') }
-        })
-        .catch(error => res.status(500).json(error));
+  const title = req.body.title;
+  const id = req.body.id;
+  const user = req.body.user;
+  const user_id = req.body.user_id;
+  image = (req.file ? `${req.protocol}://${req.get('host')}/images/${req.file.filename}` : null)
+  const post = new Post({
+    title: title,
+    id: id,
+    image: image,
+    user_id: user_id,
+
+  });
+
+
+  post
+    .save()
+    .then(() => res.status(201).json({ message: "post enregistré" }))
+    .catch((error) => res.status(400).json({ error }));
 };
 
-//Modification d'un post
-exports.update = (req, res) => {
-    //récupération de l'id du demandeur pour vérification
-    let userOrder = req.body.userIdOrder;
-    //identification du demandeur
-    let id = utils.getUserId(req.headers.authorization);
-    models.User.findOne({
-        attributes: ['id', 'email', 'username', 'isAdmin'],
-        where: { id: id }
+
+exports.getAllPosts = (req, res, next) => {
+
+
+  Post.findAll({
+    order: [['createdAt', 'DESC']],
+
+    include:
+
+    {
+      model: db.user,
+      attributes: ["firstName", "lastName", "picture"],
+
+    },
+
+
+  })
+    .then((post) => res.status(200).json(post))
+    .catch((error) => res.status(404).json({ error }));
+};
+
+
+
+exports.getOnePost = (req, res, next) => {
+  const id = req.params.id;
+
+  Post.findByPk(id)
+    .then(data => {
+      if (data) {
+        res.send(data);
+      } else {
+        res.status(404).send({
+          message: `Impossible de retrouver le post ${id}.`
+        });
+      }
     })
-        .then(user => {
-            //Vérification que le demandeur est soit l'admin soit le poster (vérif aussi sur le front)
-            if (user && (user.isAdmin == true || user.id == userOrder)) {
-                console.log('Modif ok pour le post :', req.body.postId);
-                models.Post
-                    .update(
-                        {
-                            content: req.body.newText,
-                            attachement: req.body.newImg
-                        },
-                        { where: { id: req.body.postId } }
-                    )
-                    .then(() => res.end())
-                    .catch(err => res.status(500).json(err))
-            }
-            else {
-                res.status(401).json({ error: 'Utilisateur non autorisé à modifier ce post' })
-            }
-        }
-        )
-        .catch(error => res.status(500).json(error));
-}
+    .catch(err => {
+      res.status(500).send({
+        message: "Erreur lors de la récupération du post" + id
+      });
+    });
+
+};
+
+exports.deletePost = (req, res, next) => {
+  Post.findOne({ where: { id: req.params.id } })
+    .then(post => {
+
+      Post.destroy({ where: { id: req.params.id } })
+        .then(() => res.status(200).json({ message: 'Post supprimé !' }))
+        .catch(error => res.status(400).json({ error }));
+
+    })
+    .catch(error => res.status(500).json({ error }));
+};
+
+
+exports.modifyPost = (req, res) => {
+  const id = req.params.id;
+
+  Post.update(req.body, {
+    where: { id: id }
+  })
+    .then(data => {
+      if (data) {
+        res.send({
+          message: "Post modifié avec succès"
+        });
+      } else {
+        res.send({
+          message: `Impossible de modifier le post ${id}`
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Erreur lors de la tentative de modification du post" + id
+      });
+    });
+};
+
+exports.updatePicture = (req, res, next) => {
+
+  const postObject = req.file ?
+
+    {
+      ...req.body.post,
+      image: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    } : { ...req.body };
+
+  Post.update({ ...postObject, id: req.params.id }, { where: { id: req.params.id } })
+    .then(() => res.status(200).json({ message: 'Post modifié' }))
+    .catch(error => res.status(400).json({ error }));
+};
+

@@ -1,32 +1,53 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 
-Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
+    name: 'Landing',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../components/SignUp.vue')
+  },
+  {
+    path: '/SignUp',
+    name: 'SignUp',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../components/SignUp.vue')
+  },
+  {
+    path: '/Login',
     name: 'Login',
-    component: () => import('../views/Login.vue')
-  },
- {
-  path: '/wall',
-  name: 'Wall',
-  component: () => import('../views/Wall.vue')
-},
-  {
-    path: '/signup',
-    name: 'Signup',
-    component: () => import('../views/Signup.vue')
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../components/Login.vue')
   },
   {
-    path: '/user',
-    name: 'User',
-    component: () => import('../views/User.vue')
-  }
+    path: '/Home',
+    name: 'Home',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Home.vue'),
+
+  },
+  {
+    path: '/Profile',
+    name: 'Profile',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Profile.vue')
+  },
+  
 ]
 
-const router = new VueRouter({
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
   routes
 })
 

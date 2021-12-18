@@ -1,38 +1,61 @@
-//Import
 const express = require('express');
+
+
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
-const helmet = require("helmet");
-const morgan = require('morgan');
+const path = require("path");
+//const rateLimit = require("./middleware/rateLimit");
+require('dotenv').config();
 
-const userRoutes = require('./routes/user.js');
-const postRoutes = require('./routes/post.js');
 
-const path = require('path');
-//const likeRoutes = require('./routes/like.js');
 
-//création application Express
+
+
+
 const app = express();
 
+const db = require("./db.confing");
 
-//Résolution erreur CORS
+
+
+//app.use(rateLimit);  // Pour empêcher les attaques brutes
+app.use(helmet()); //Tous les éléments plus bas sont intégrés à helmet mais cela permet de savoir exactement de quoi helmet protège
+
+
+
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); 
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+
   next();
 });
-app.use(morgan('dev'));
 
-//Parser les corps des requête + forcer parse d'objets inclus dans d'autres objets
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 
-//Middleware
-app.use(helmet());
-app.use('/images', express.static(path.join(__dirname, 'images')));
 
-app.use('/api/user', userRoutes);
-app.use('/api/post', postRoutes);
+app.use(bodyParser.json()); // Permet d'extraire le format JSON de nos requêtes 
+
+
+app.use('/images', express.static(path.join(__dirname, 'images'))); // On récupère les images dans notre dossier images
+
+
+
+
+const userRoute = require('./routes/userRoute');
+const postRoute = require('./routes/postRoute');
+const commentRoute = require('./routes/commentRoute');
+
+app.use('/api/', userRoute);
+app.use('/api/', postRoute);
+app.use('/api/', commentRoute);
+
+
 
 
 module.exports = app;
