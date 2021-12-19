@@ -145,7 +145,7 @@ try {
         hour: "numeric",
         minute: "numeric",
       };
-      return event.toLocaleDateString("fr-Fr", options);
+      return event.toLocaleDateString("fr-FR", options);
     },
 
 
